@@ -48,17 +48,29 @@ public class Indexer {
 
 	}
 
-	public int createIndex(String dataDirPath) throws IOException {
-		// get all files in the data directory
-		File[] files = new File(dataDirPath).listFiles();
+	
+	public int createIndex(String directoryName) throws IOException {
+	    File directory = new File(directoryName);
 
-		for (File file : files) {
-			if (!file.isDirectory() && !file.isHidden() && file.exists() && file.canRead()) {
-				index(file);
-			}
-		}
-		return indexWriter.numDocs();
-	}
+	    // Get all files from a directory.
+	    File[] fList = directory.listFiles();
+	    if(fList != null)
+	        for (File file : fList) {      
+	            if (file.isFile()) {
+	            	File[] files = new File(directoryName).listFiles();
+	        		
+	        		for (File f : files) {
+	        			if (!f.isDirectory() && !f.isHidden() && f.exists() && f.canRead()) {
+	        				index(f);
+	        			}
+	        		}
+	            } else if (file.isDirectory()) {
+	                createIndex(file.getAbsolutePath());
+	            }
+	        }
+	    return indexWriter.numDocs();
+	    }
+	
 
 	public void index(File file) throws IOException {
 		Document doc = getDocument(file);
