@@ -5,6 +5,12 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -48,33 +54,41 @@ public class Indexer {
 
 	}
 
-	
 	public int createIndex(String directoryName) throws IOException {
-	    File directory = new File(directoryName);
+		File candidateFile = new File(directoryName);
 
-	    // Get all files from a directory.
-	    File[] fList = directory.listFiles();
-	    if(fList != null)
-	        for (File file : fList) {      
-	            if (file.isFile()) {
-	            	File[] files = new File(directoryName).listFiles();
-	        		
-	        		for (File f : files) {
-	        			if (!f.isDirectory() && !f.isHidden() && f.exists() && f.canRead()) {
-	        				index(f);
-	        			}
-	        		}
-	            } else if (file.isDirectory()) {
-	                createIndex(file.getAbsolutePath());
-	            }
-	        }
-	    return indexWriter.numDocs();
-	    }
-	
+		// Get all files from a directory.
+		if (candidateFile.isDirectory()) {
+			Path path = Paths.get(candidateFile.getAbsolutePath());
+			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+					try {
+						File fileToIndex = file.toFile();
+						index(fileToIndex);
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+
+					return FileVisitResult.CONTINUE;
+				}
+
+			});
+		} else {
+			index(candidateFile);
+		}
+
+		return indexWriter.numDocs();
+	}
+
+	public void commit() throws IOException {
+		indexWriter.commit();
+	}
 
 	public void index(File file) throws IOException {
 		Document doc = getDocument(file);
 		indexWriter.addDocument(doc);
+//		indexWriter.commit();
 	}
 
 	public void close() throws CorruptIndexException, IOException {

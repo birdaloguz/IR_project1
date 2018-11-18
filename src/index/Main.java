@@ -15,7 +15,6 @@ public class Main {
    String dataDir = "./data";
    Indexer indexer;
    Searcher searcher;
-
    public static void main(String[] args) {
       Main tester;
       try {
@@ -25,10 +24,11 @@ public class Main {
          File index = new File(indexDir);
          File[] indexes = index.listFiles();
          if(indexes.length == 0){
+             System.out.println("Started indexing...");
              tester.createIndex();
-
          }
          tester.search(query);
+         scan.close();
       } catch (IOException e) {
          e.printStackTrace();
       } catch (ParseException e) {
