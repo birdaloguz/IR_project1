@@ -36,7 +36,7 @@ public class Suggestion {
 	public String[] suggest(String query) throws IOException {
 		
 		String[] suggestions = spellChecker.suggestSimilar(query, 1);
-
+		
 		return suggestions;
 	}
 

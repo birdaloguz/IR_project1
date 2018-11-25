@@ -40,18 +40,23 @@ public class Main {
          Suggestion suggest = new Suggestion("./dictionary");
          Scanner command = new Scanner(System.in);
          
-         if(!suggest.exist(query)){
-             String[] similarWord = suggest.suggest(query);
-        	 System.out.println("Did you mean: " + similarWord[0] + ". If yes type Y and hit enter, other wise just hit enter.");
-        	 
-        	 String cmd = command.nextLine();
-             
-             if(cmd.equalsIgnoreCase("Y")){
-            	 query = similarWord[0];
-             } else {
-//            	 suggest.addToDictionary(query);
-             }
-         }
+			if (!suggest.exist(query)) {
+				String[] similarWord = suggest.suggest(query);
+
+				if (similarWord.length > 0) {
+					System.out.println("Did you mean: " + Arrays.asList(similarWord).toString()
+							+ ". If yes type Y and hit enter, other wise just hit enter.");
+
+					String cmd = command.nextLine();
+
+					if (cmd.equalsIgnoreCase("Y")) {
+						query = similarWord[0];
+					} else {
+						// suggest.addToDictionary(query);
+					}
+				}
+
+			}
          
     	 main.search(query);
 
