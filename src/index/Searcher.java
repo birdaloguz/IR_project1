@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -25,11 +26,12 @@ public class Searcher {
 	public Searcher(String indexDir) throws IOException {
 		// TODO Auto-generated constructor stub
 		Directory indexDirectory = FSDirectory.open(new File(indexDir));
-
-		indexSearcher = new IndexSearcher(indexDirectory);
+		
+		IndexReader reader = IndexReader.open(indexDirectory);
+		
+		indexSearcher = new IndexSearcher(reader);
 
 		queryParser = new QueryParser(Version.LUCENE_36, Config.CONTENTS, new StandardAnalyzer(Version.LUCENE_36));
-
 	}
 
 	public TopDocs search(String searchQuery) throws IOException, ParseException {
@@ -37,11 +39,15 @@ public class Searcher {
 		return indexSearcher.search(query, Config.MAX_SEARCH);
 	}
 
+	public TopDocs search(Query query) throws IOException {
+		return indexSearcher.search(query, Config.MAX_SEARCH);
+	}
+
 	public Document getDocument(ScoreDoc scoreDoc) throws CorruptIndexException, IOException {
 		return indexSearcher.doc(scoreDoc.doc);
 	}
-	
-	public void close() throws IOException{
+
+	public void close() throws IOException {
 		indexSearcher.close();
 	}
 }

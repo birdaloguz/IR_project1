@@ -1,7 +1,6 @@
 package index;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,15 +24,17 @@ import org.apache.lucene.util.Version;
 public class Indexer {
 
 	private IndexWriter indexWriter;
+	private Directory indexDirectory;
+	private IndexWriterConfig writerConfig;
 
 	public Indexer(String indexDir) throws IOException {
 		// TODO Auto-generated constructor stub
-		Directory indexDirectory = FSDirectory.open(new File(indexDir));
+		indexDirectory = FSDirectory.open(new File(indexDir));
 
-		IndexWriterConfig writerConfig = new IndexWriterConfig(Version.LUCENE_36,
-				new StandardAnalyzer(Version.LUCENE_36));
+		writerConfig = new IndexWriterConfig(Version.LUCENE_36, new StandardAnalyzer(Version.LUCENE_36));
 
 		indexWriter = new IndexWriter(indexDirectory, writerConfig);
+
 	}
 
 	public Document getDocument(File file) throws FileNotFoundException {
@@ -64,8 +65,8 @@ public class Indexer {
 
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
 					try {
-						File fileToIndex = file.toFile();
-						index(fileToIndex);
+//						File fileToIndex = file.toFile();
+						createIndex(file.toString());
 					} catch (IOException ex) {
 						ex.printStackTrace();
 					}
@@ -88,11 +89,35 @@ public class Indexer {
 	public void index(File file) throws IOException {
 		Document doc = getDocument(file);
 		indexWriter.addDocument(doc);
-//		indexWriter.commit();
+		// indexWriter.commit();
 	}
 
 	public void close() throws CorruptIndexException, IOException {
 		indexWriter.close();
+	}
+
+	public IndexWriter getIndexWriter() {
+		return indexWriter;
+	}
+
+	public void setIndexWriter(IndexWriter indexWriter) {
+		this.indexWriter = indexWriter;
+	}
+
+	public Directory getIndexDirectory() {
+		return indexDirectory;
+	}
+
+	public void setIndexDirectory(Directory indexDirectory) {
+		this.indexDirectory = indexDirectory;
+	}
+
+	public IndexWriterConfig getWriterConfig() {
+		return writerConfig;
+	}
+
+	public void setWriterConfig(IndexWriterConfig writerConfig) {
+		this.writerConfig = writerConfig;
 	}
 
 }
