@@ -91,6 +91,17 @@ public class Indexer {
 		indexWriter.addDocument(doc);
 		// indexWriter.commit();
 	}
+	
+//	public void createIndex(String dataDir) throws IOException {
+////	      indexer = new Indexer(indexDir);
+//	      int numIndexed;
+//	      long startTime = System.currentTimeMillis();	
+//	      numIndexed = this.createIndex(dataDir);
+//	      long endTime = System.currentTimeMillis();
+////	      indexer.close();
+//	      System.out.println(numIndexed+" File indexed, time taken: "
+//	         +(endTime-startTime)+" ms");		
+//	   }
 
 	public void close() throws CorruptIndexException, IOException {
 		indexWriter.close();
