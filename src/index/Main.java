@@ -46,7 +46,7 @@ public class Main {
         	 
         	 String cmd = command.nextLine();
              
-             if(cmd.equals("Y")){
+             if(cmd.equalsIgnoreCase("Y")){
             	 query = similarWord[0];
              } else {
 //            	 suggest.addToDictionary(query);
