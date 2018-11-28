@@ -36,6 +36,8 @@ public class Main {
 		   if(flag == -1){
 			   System.out.println("Terminated.");
 			   break;
+		   } else if(flag == 1){
+			   System.out.println("Moving on...");
 		   }
 	   }
 	   
