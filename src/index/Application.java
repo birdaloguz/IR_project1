@@ -15,12 +15,12 @@ import org.apache.lucene.search.TopDocs;
 
 public class Application {
 	
-	   String indexDir = "./index";
-	   String dataDir = "./data";
-	   Indexer indexer;
-	   Searcher searcher;
-	   Scanner scan = new Scanner(System.in);
-       Scanner command = new Scanner(System.in);
+	   private String indexDir = "./index";
+	   private String dataDir = "./data";
+	   private Indexer indexer;
+	   private Searcher searcher;
+	   private Scanner scan = new Scanner(System.in);
+	   private Scanner command = new Scanner(System.in);
 	   
 	public Application() {
 		// TODO Auto-generated constructor stub
