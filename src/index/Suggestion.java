@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.spell.LevensteinDistance;
 import org.apache.lucene.search.spell.PlainTextDictionary;
@@ -25,8 +24,6 @@ public class Suggestion {
 
 		IndexWriterConfig writerConfig = new IndexWriterConfig(Version.LUCENE_36,
 				new StandardAnalyzer(Version.LUCENE_36));
-
-//		IndexReader reader = IndexReader.open(directory);
 
 		spellChecker.setStringDistance(new LevensteinDistance());
 		
