@@ -13,7 +13,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
-public class Application {
+public class Application{
 	
 	   private String indexDir = "./index";
 	   private String dataDir = "./data";
@@ -22,9 +22,9 @@ public class Application {
 	   private Scanner scan = new Scanner(System.in);
 	   private Scanner command = new Scanner(System.in);
 	   
-	public Application() {
+	public Application() throws IOException {
 		// TODO Auto-generated constructor stub
-		
+			this.searcher = new Searcher(indexDir);
 	}
 	
 	public void run() throws ParseException{
@@ -59,7 +59,12 @@ public class Application {
 	             }
 	        	 
 	         } 
+	         
+	         System.out.println("Initial results: \n");
 	    	 search(query);
+	    	 Rocchio r = new Rocchio(1f, 0.8f, searcher);
+	    	 System.out.println("Results after Rocchio: \n");
+	    	 search(r.expandQuery(query).toString("contents"));
 	         
 	         
 	      } catch (IOException e) {
@@ -85,7 +90,7 @@ public class Application {
 	}
 	
 	 public void search(String searchQuery) throws IOException, ParseException {
-	      searcher = new Searcher(indexDir);
+//	      searcher = new Searcher(indexDir);
 	      long startTime = System.currentTimeMillis();
 	      TopDocs hits = searcher.search(searchQuery);
 	      long endTime = System.currentTimeMillis();

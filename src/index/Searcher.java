@@ -12,6 +12,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -22,14 +23,15 @@ public class Searcher {
 	private IndexSearcher indexSearcher;
 	private QueryParser queryParser;
 	private Query query;
-
+	private IndexReader reader;
+	
 	public Searcher(String indexDir) throws IOException {
 		// TODO Auto-generated constructor stub
 		Directory indexDirectory = FSDirectory.open(new File(indexDir));
 		
-		IndexReader reader = IndexReader.open(indexDirectory);
+		this.reader = IndexReader.open(indexDirectory);
 		
-		indexSearcher = new IndexSearcher(reader);
+		this.indexSearcher = new IndexSearcher(reader);
 
 		queryParser = new QueryParser(Version.LUCENE_36, Config.CONTENTS, new StandardAnalyzer(Version.LUCENE_36));
 	}
@@ -50,4 +52,17 @@ public class Searcher {
 	public void close() throws IOException {
 		indexSearcher.close();
 	}
+	
+	public IndexReader getReader(){
+		return reader;
+	}
+	
+	public Similarity getSimilarity(){
+		return indexSearcher.getSimilarity();
+	}
+	
+	public IndexSearcher getSearcher(){
+		return indexSearcher;
+	}
+	
 }

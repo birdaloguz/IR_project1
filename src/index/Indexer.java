@@ -43,9 +43,9 @@ public class Indexer {
 
 		Field content = new Field(Config.CONTENTS, new FileReader(file));
 
-		Field fileName = new Field(Config.FILE_NAME, file.getName(), Field.Store.YES, Field.Index.ANALYZED);
+		Field fileName = new Field(Config.FILE_NAME, file.getName(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES);
 
-		Field filePath = new Field(Config.FILE_PATH, file.getPath(), Field.Store.YES, Field.Index.ANALYZED);
+		Field filePath = new Field(Config.FILE_PATH, file.getPath(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES);
 
 		document.add(content);
 		document.add(fileName);
