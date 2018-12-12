@@ -1,19 +1,23 @@
 package index;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.CharBuffer;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldSelectorResult;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -37,12 +41,30 @@ public class Indexer {
 
 	}
 
-	public Document getDocument(File file) throws FileNotFoundException {
+	public Document getDocument(File file) throws IOException {
 
 		Document document = new Document();
-
-		Field content = new Field(Config.CONTENTS, new FileReader(file));
-
+		String text;
+		String docText = "";
+		BufferedReader reader = new BufferedReader(new FileReader(file.getPath()));
+		while((text = reader.readLine()) != null){
+			
+			if(text.startsWith("X-FileName")){
+				String[] line = text.split(" ");
+				for(String s: line)
+					docText += s + " ";
+			}
+			
+		}
+		
+		String[] readDoc = docText.split(" ");
+		String content = "";
+		for(int i = 0; i < readDoc.length; i++){
+			
+		}
+		
+		Field content = new Field(Config.CONTENTS, docText,  Field.Store.YES, Field.Index.ANALYZED);
+		
 		Field fileName = new Field(Config.FILE_NAME, file.getName(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES);
 
 		Field filePath = new Field(Config.FILE_PATH, file.getPath(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES);
@@ -89,19 +111,7 @@ public class Indexer {
 	public void index(File file) throws IOException {
 		Document doc = getDocument(file);
 		indexWriter.addDocument(doc);
-		// indexWriter.commit();
 	}
-	
-//	public void createIndex(String dataDir) throws IOException {
-////	      indexer = new Indexer(indexDir);
-//	      int numIndexed;
-//	      long startTime = System.currentTimeMillis();	
-//	      numIndexed = this.createIndex(dataDir);
-//	      long endTime = System.currentTimeMillis();
-////	      indexer.close();
-//	      System.out.println(numIndexed+" File indexed, time taken: "
-//	         +(endTime-startTime)+" ms");		
-//	   }
 
 	public void close() throws CorruptIndexException, IOException {
 		indexWriter.close();

@@ -22,13 +22,14 @@ public class Application{
 	   private Scanner scan = new Scanner(System.in);
 	   private Scanner command = new Scanner(System.in);
 	   
-	public Application() throws IOException {
+	public Application(){
 		// TODO Auto-generated constructor stub
-			this.searcher = new Searcher(indexDir);
+		
+		
 	}
 	
-	public void run() throws ParseException{
-		
+	public void run() throws ParseException, IOException{
+//		indexer = new Indexer(indexDir);
 		 try {
 			 
 	    	 System.out.println("Enter search query: ");
@@ -42,7 +43,7 @@ public class Application{
 	             System.out.println("Started indexing...");
 	             createIndex();
 	         }
-	         
+//	         searcher = new Searcher(indexDir);
 	         Suggestion suggest = new Suggestion("./dictionary");
 	         
 	         if(!suggest.exist(query)){
@@ -90,7 +91,7 @@ public class Application{
 	}
 	
 	 public void search(String searchQuery) throws IOException, ParseException {
-//	      searcher = new Searcher(indexDir);
+	      searcher = new Searcher(indexDir);
 	      long startTime = System.currentTimeMillis();
 	      TopDocs hits = searcher.search(searchQuery);
 	      long endTime = System.currentTimeMillis();
