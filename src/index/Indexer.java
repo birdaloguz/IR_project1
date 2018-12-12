@@ -48,19 +48,10 @@ public class Indexer {
 		String docText = "";
 		BufferedReader reader = new BufferedReader(new FileReader(file.getPath()));
 		while((text = reader.readLine()) != null){
+			String[] line = text.split(" ");
 			
-			if(text.startsWith("X-FileName")){
-				String[] line = text.split(" ");
-				for(String s: line)
-					docText += s + " ";
-			}
-			
-		}
-		
-		String[] readDoc = docText.split(" ");
-		String content = "";
-		for(int i = 0; i < readDoc.length; i++){
-			
+			for(String s: line)
+				docText += s + " ";
 		}
 		
 		Field content = new Field(Config.CONTENTS, docText,  Field.Store.YES, Field.Index.ANALYZED);
