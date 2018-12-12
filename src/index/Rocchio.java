@@ -187,7 +187,7 @@ public class Rocchio {
 //			}
 			if(docText.length == 0) continue;
 			for(int j = 0; j < docText.length; j++){
-				documentText.append(docText[i] + " ");
+				documentText.append(docText[j] + " "); //SHOULD CHANGE
 			}
 			
 			QueryTermVector docTerms = new QueryTermVector(documentText.toString(), new StandardAnalyzer(Version.LUCENE_36));
