@@ -45,16 +45,10 @@ public class Indexer {
 
 		Document document = new Document();
 		String text;
-		String docText = "";
+		String mailBody = "";
 		BufferedReader reader = new BufferedReader(new FileReader(file.getPath()));
-		while((text = reader.readLine()) != null){
-			String[] line = text.split(" ");
-			
-			for(String s: line)
-				docText += s + " ";
-		}
 		
-		Field content = new Field(Config.CONTENTS, docText,  Field.Store.YES, Field.Index.ANALYZED);
+		Field content = new Field(Config.CONTENTS, reader);
 		
 		Field fileName = new Field(Config.FILE_NAME, file.getName(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES);
 

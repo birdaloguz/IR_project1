@@ -1,10 +1,8 @@
 package index;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -12,7 +10,6 @@ import java.util.Vector;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -40,7 +37,7 @@ public class Rocchio {
 	public Query expandQuery(String query) throws IOException, ParseException{
 		Query expandedQuery;
 		Vector<Document> relatedDocuments = getRelatedDocumentVectors(query);
-		Vector<QueryTermVector> docsTermVector = getDocsTerms(relatedDocuments);
+		Vector<QueryTermVector> docsTermVector = getDocsTerms(relatedDocuments, 50);
 		
 		Vector<Query> docsTerms = setWeight(docsTermVector, beta);
 		
@@ -170,21 +167,30 @@ public class Rocchio {
 		return terms;
 	}
 	
-	public Vector<QueryTermVector> getDocsTerms(Vector<Document> hits) throws IOException{
+	public Vector<QueryTermVector> getDocsTerms(Vector<Document> hits, int maxTerms) throws IOException{
 		Vector<QueryTermVector> docsTerms = new Vector<QueryTermVector>();
 		
 		for(int i = 0; i < NUM_OF_RELEVANT; i++){
 			Document doc = hits.elementAt(i);
 			StringBuffer documentText =  new StringBuffer();
-			String[] docText = doc.get(Config.CONTENTS).split(" ");
+//			String[] docText = doc.get(Config.CONTENTS).split(" ");
 //			ArrayList<String> docText = new ArrayList<>();
-//			String content;
-//			BufferedReader reader = new BufferedReader(new FileReader(doc.get(Config.FILE_PATH)));
-//			while((content = reader.readLine()) != null){
-//				String[] line = content.split(" ");
-//				for(String s: line)
-//					docText.add(s);
-//			}
+			String mailBody = "";
+			String text;
+			BufferedReader reader = new BufferedReader(new FileReader(doc.get(Config.FILE_PATH)));
+			while((text = reader.readLine()) != null){
+				if(text.startsWith("X-FileName")){
+					String next;
+					int j = 0;
+					while((next = reader.readLine()) != null && j < maxTerms){
+						String[] line = next.split(" ");
+						for(String s: line)
+							mailBody += s + " ";
+						j++;
+					}
+				}
+			}
+			String[] docText = mailBody.split(" ");
 			if(docText.length == 0) continue;
 			for(int j = 0; j < docText.length; j++){
 				documentText.append(docText[j] + " "); //SHOULD CHANGE
