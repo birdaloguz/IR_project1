@@ -63,7 +63,7 @@ public class Application{
 	         
 	         System.out.println("Initial results: \n");
 	    	 search(query);
-	    	 Rocchio r = new Rocchio(1f, 0.8f, searcher);
+	    	 Rocchio r = new Rocchio(1f, 0.0f, searcher);
 	    	 System.out.println("Results after Rocchio: \n");
 	    	 search(r.expandQuery(query).toString("contents"));
 	         

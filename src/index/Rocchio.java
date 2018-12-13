@@ -24,7 +24,7 @@ public class Rocchio {
 	private float alpha;
 	private float beta;
 	private Searcher searcher;
-    private static final int NUM_OF_RELEVANT = 15;
+    private static final int NUM_OF_RELEVANT = 10;
 
 	
 	public Rocchio(float alpha, float beta, Searcher searcher) {
@@ -37,14 +37,14 @@ public class Rocchio {
 	public Query expandQuery(String query) throws IOException, ParseException{
 		Query expandedQuery;
 		Vector<Document> relatedDocuments = getRelatedDocumentVectors(query);
-		Vector<QueryTermVector> docsTermVector = getDocsTerms(relatedDocuments, 50);
-		
-		Vector<Query> docsTerms = setWeight(docsTermVector, beta);
+		Vector<QueryTermVector> docsTermVector = getDocsTerms(relatedDocuments);
+
+		Vector<TermQuery> docsTerms = setWeight(docsTermVector, beta);
 		
 		QueryTermVector queryTermsVector = new QueryTermVector(query, new StandardAnalyzer(Version.LUCENE_36));
-		Vector<Query> queryTerms = setWeightQueryTerms(queryTermsVector, alpha);
+		Vector<TermQuery> queryTerms = setWeightQueryTerms(queryTermsVector, alpha);
 		
-		Vector<Query> expandedQueryVector = combine(queryTerms, docsTerms);
+		Vector<TermQuery> expandedQueryVector = combine(queryTerms, docsTerms);
 			
         Collections.sort(expandedQueryVector, new Comparator<Object>() {
 
@@ -66,7 +66,7 @@ public class Rocchio {
 		
         expandedQuery = null;
         try{
-        	expandedQuery = mergeQueries(expandedQueryVector);
+        	expandedQuery = mergeQueries(expandedQueryVector, 10);
         	System.err.println(expandedQuery.toString("contents"));
         } catch(Exception e){
         	e.printStackTrace();
@@ -76,11 +76,11 @@ public class Rocchio {
         
 	}
 	
-	public Query mergeQueries(Vector<Query> termQueries){
+	public Query mergeQueries(Vector<TermQuery> termQueries, int maxTerms){
 		Query query = null;
 
 		// Select only the maxTerms number of terms
-		int termCount = termQueries.size();
+		int termCount = Math.min(termQueries.size(), maxTerms);
 
 		// Create Query String
 		StringBuffer queryBuffer = new StringBuffer();
@@ -101,13 +101,34 @@ public class Rocchio {
 		return query;
 	}
 	
-	public Vector<Query> combine(Vector<Query> queryTerms, Vector<Query> docsTerms){
-		Vector<Query> terms = new Vector<Query>();
+	private void merge(Vector<TermQuery> terms) {
+		for (int i = 0; i < terms.size(); i++) {
+			TermQuery term = terms.elementAt(i);
+			// Itterate through terms and if term is equal then merge: add the
+			// boost; and delete the term
+			for (int j = i + 1; j < terms.size(); j++) {
+				TermQuery tmpTerm = terms.elementAt(j);
+
+				// If equal then merge
+				if (tmpTerm.getTerm().text().equals(term.getTerm().text())) {
+					// Add boost factors of terms
+					term.setBoost(term.getBoost() + tmpTerm.getBoost());
+					// delete uncessary term
+					terms.remove(j);
+					// decrement j so that term is not skipped
+					j--;
+				}
+			}
+		}
+	}
+	
+	public Vector<TermQuery> combine(Vector<TermQuery> queryTerms, Vector<TermQuery> docsTerms){
+		Vector<TermQuery> terms = new Vector<TermQuery>();
 		terms.addAll(docsTerms);
 		
 		for(int i = 0; i < queryTerms.size(); i++){
-			Query term = queryTerms.elementAt(i);
-			Query duplicateTerm = find(term, terms);
+			TermQuery term = queryTerms.elementAt(i);
+			TermQuery duplicateTerm = find(term, terms);
 			if(duplicateTerm != null){
 				float weight = term.getBoost() + duplicateTerm.getBoost();
 				duplicateTerm.setBoost(weight);
@@ -118,12 +139,12 @@ public class Rocchio {
 		return terms;
 	}
 	
-	public Query find(Query term, Vector<Query> terms) {
-		Query termFound = null;
+	public TermQuery find(TermQuery term, Vector<TermQuery> terms) {
+		TermQuery termFound = null;
 
-		Iterator<Query> iterator = terms.iterator();
+		Iterator<TermQuery> iterator = terms.iterator();
 		while (iterator.hasNext()) {
-			Query currentTerm = iterator.next();
+			TermQuery currentTerm = iterator.next();
 			if (term.equals(currentTerm)) {
 				termFound = currentTerm;
 			}
@@ -133,17 +154,33 @@ public class Rocchio {
 	}
 	
 	//Set the weights of query terms for vectorizing using TFIDF weighting
-	public Vector<Query> setWeightQueryTerms(QueryTermVector termVector, float alpha){
-		Vector<QueryTermVector> vector = new Vector<QueryTermVector>();
+	public Vector<TermQuery> setWeightQueryTerms(QueryTermVector termVector, float alpha) {
+		Vector<TermQuery> terms = new Vector<TermQuery>();
+
+		String[] documentTerms = termVector.getTerms();
+		int[] termFreqs = termVector.getTermFrequencies();
+
+		for (int j = 0; j < documentTerms.length; j++) {
+			String termText = documentTerms[j];
+			Term term = new Term(Config.CONTENTS, termText);
+
+			int termFreq = termFreqs[j];
+			float inverseDocFreq = searcher.getSimilarity().idf(termFreq, termVector.size());
+			float weight = termFreq * inverseDocFreq;
+
+			TermQuery query = new TermQuery(term);
+			query.setBoost(alpha * weight);
+			terms.add(query);
+		}
 		
-		vector.add(termVector);
+		merge(terms);
 		
-		return setWeight(vector, alpha);		
+		return terms;
 	}
 	
 	//Generic function for setting the weights of terms using TFIDF weighting
-	public Vector<Query> setWeight(Vector<QueryTermVector> docsTerms, float factor){
-		Vector<Query> terms = new Vector<Query>();
+	public Vector<TermQuery> setWeight(Vector<QueryTermVector> docsTerms, float factor){
+		Vector<TermQuery> terms = new Vector<TermQuery>();
 		
 		for(int i = 0; i < docsTerms.size(); i++){
 			QueryTermVector docTerms = docsTerms.elementAt(i);
@@ -158,47 +195,53 @@ public class Rocchio {
 				float inverseDocFreq = searcher.getSimilarity().idf(termFreq, docTerms.size());
 				float weight = termFreq * inverseDocFreq;
 				
-				Query query = new TermQuery(term);
-				query.setBoost(factor * weight);
+				TermQuery query = new TermQuery(term);
+				query.setBoost((factor / NUM_OF_RELEVANT) * weight);
 				terms.add(query);
 			}
 		}
 		
+		merge(terms);
+		
 		return terms;
+		
 	}
 	
-	public Vector<QueryTermVector> getDocsTerms(Vector<Document> hits, int maxTerms) throws IOException{
+	public Vector<QueryTermVector> getDocsTerms(Vector<Document> hits) throws IOException {
 		Vector<QueryTermVector> docsTerms = new Vector<QueryTermVector>();
-		
-		for(int i = 0; i < NUM_OF_RELEVANT; i++){
-			Document doc = hits.elementAt(i);
-			StringBuffer documentText =  new StringBuffer();
-//			String[] docText = doc.get(Config.CONTENTS).split(" ");
-//			ArrayList<String> docText = new ArrayList<>();
-			String mailBody = "";
-			String text;
-			BufferedReader reader = new BufferedReader(new FileReader(doc.get(Config.FILE_PATH)));
-			while((text = reader.readLine()) != null){
-				if(text.startsWith("X-FileName")){
-					String next;
-					int j = 0;
-					while((next = reader.readLine()) != null && j < maxTerms){
-						String[] line = next.split(" ");
-						for(String s: line)
-							mailBody += s + " ";
-						j++;
+		try {
+			for (int i = 0; i < NUM_OF_RELEVANT; i++) {
+				Document doc = hits.elementAt(i);
+				StringBuffer documentText = new StringBuffer();
+				String mailBody = "";
+				String text;
+				BufferedReader reader = new BufferedReader(new FileReader(doc.get(Config.FILE_PATH)));
+				while ((text = reader.readLine()) != null) {
+					if (text.startsWith("X-FileName")) {
+						String next;
+						while ((next = reader.readLine()) != null) {
+							String[] line = next.split(" ");
+							for (String s : line)
+								mailBody += s + " ";
+						}
 					}
 				}
+				String[] docText = mailBody.split(" ");
+				if (docText.length == 0)
+					continue;
+				for (int j = 0; j < docText.length; j++) {
+					documentText.append(docText[j] + " "); // SHOULD CHANGE
+				}
+
+				QueryTermVector docTerms = new QueryTermVector(documentText.toString(),
+						new StandardAnalyzer(Version.LUCENE_36));
+				docsTerms.add(docTerms);
 			}
-			String[] docText = mailBody.split(" ");
-			if(docText.length == 0) continue;
-			for(int j = 0; j < docText.length; j++){
-				documentText.append(docText[j] + " "); //SHOULD CHANGE
-			}
-			
-			QueryTermVector docTerms = new QueryTermVector(documentText.toString(), new StandardAnalyzer(Version.LUCENE_36));
-			docsTerms.add(docTerms);
+
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.err.println("List error");
 		}
+
 		return docsTerms;
 	}
 	
@@ -215,11 +258,10 @@ public class Rocchio {
 			System.out.println("Initial results are not enough.");
 		}
 		
-		
 		return relatedDocVectors;
 		
 	}
-	
+
 	public float getAlpha() {
 		return alpha;
 	}
