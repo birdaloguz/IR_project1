@@ -226,7 +226,7 @@ public class Rocchio {
 						}
 					}
 				}
-				String[] docText = mailBody.split("[0-9]+");
+				String[] docText = mailBody.split("[^a-zA-Z]+");
 				if (docText.length == 0)
 					continue;
 				for (int j = 0; j < docText.length; j++) {
