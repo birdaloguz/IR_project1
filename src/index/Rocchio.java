@@ -226,11 +226,11 @@ public class Rocchio {
 						}
 					}
 				}
-				String[] docText = mailBody.split(" ");
+				String[] docText = mailBody.split("[0-9]+");
 				if (docText.length == 0)
 					continue;
 				for (int j = 0; j < docText.length; j++) {
-					documentText.append(docText[j] + " "); // SHOULD CHANGE
+					documentText.append(docText[j] + " ");
 				}
 
 				QueryTermVector docTerms = new QueryTermVector(documentText.toString(),

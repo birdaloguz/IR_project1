@@ -37,6 +37,9 @@ public class Application{
 	    	 String query = scan.nextLine();
 	         
 	         File index = new File(indexDir);
+	         if(!index.exists()){
+	        	 index.mkdir();
+	         }
 	         File[] indexes = index.listFiles();
 	         
 	         if(indexes.length == 0){
