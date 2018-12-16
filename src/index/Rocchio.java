@@ -24,7 +24,7 @@ public class Rocchio {
 	private float alpha;
 	private float beta;
 	private Searcher searcher;
-    private static final int NUM_OF_RELEVANT = 10;
+    private static final int NUM_OF_RELEVANT = 8;
 
 	
 	public Rocchio(float alpha, float beta, Searcher searcher) {
@@ -34,45 +34,51 @@ public class Rocchio {
 		this.searcher = searcher;
 	}
 	
+	//Query expansion using Rocchio algorithm
 	public Query expandQuery(String query) throws IOException, ParseException{
-		Query expandedQuery;
+		Query expandedQuery = null;
 		Vector<Document> relatedDocuments = getRelatedDocumentVectors(query);
 		Vector<QueryTermVector> docsTermVector = getDocsTerms(relatedDocuments);
-
-		Vector<TermQuery> docsTerms = setWeight(docsTermVector, beta);
 		
-		QueryTermVector queryTermsVector = new QueryTermVector(query, new StandardAnalyzer(Version.LUCENE_36));
-		Vector<TermQuery> queryTerms = setWeightQueryTerms(queryTermsVector, alpha);
-		
-		Vector<TermQuery> expandedQueryVector = combine(queryTerms, docsTerms);
+		if(!(relatedDocuments.size() < NUM_OF_RELEVANT)){
+			Vector<TermQuery> docsTerms = setWeightDocTerms(docsTermVector, beta);
 			
-        Collections.sort(expandedQueryVector, new Comparator<Object>() {
-
-			@Override
-			public int compare(Object o1, Object o2) {
-				// TODO Auto-generated method stub
-				Query q1 = (Query) o1;
-				Query q2 = (Query) o2;
+			QueryTermVector queryTermsVector = new QueryTermVector(query, new StandardAnalyzer(Version.LUCENE_36));
+			Vector<TermQuery> queryTerms = setWeightQueryTerms(queryTermsVector, alpha);
+			
+			Vector<TermQuery> expandedQueryVector = combineWeights(queryTerms, docsTerms);
 				
-				if(q1.getBoost() > q2.getBoost()){
-					return -1;
-				} else if(q2.getBoost() > q1.getBoost()){
-					return 1;
-				} else {
-	 				return 0;
-				}
-			}
-		} ); 
-		
-        expandedQuery = null;
-        try{
-        	expandedQuery = mergeQueries(expandedQueryVector, 10);
-        	System.err.println(expandedQuery.toString("contents"));
-        } catch(Exception e){
-        	e.printStackTrace();
-        }
-        
-        return expandedQuery;
+//	        Collections.sort(expandedQueryVector, new Comparator<Object>() {
+//
+//				@Override
+//				public int compare(Object o1, Object o2) {
+//					// TODO Auto-generated method stub
+//					Query q1 = (Query) o1;
+//					Query q2 = (Query) o2;
+//					
+//					if(q1.getBoost() > q2.getBoost()){
+//						return -1;
+//					} else if(q2.getBoost() > q1.getBoost()){
+//						return 1;
+//					} else {
+//		 				return 0;
+//					}
+//				}
+//			} ); 
+			
+	        
+	        try{
+	        	expandedQuery = mergeQueries(expandedQueryVector, 10);
+	        	System.out.println("\u001B[32mExpanded Query: " + expandedQuery.toString("contents") + "\033[0m");
+	        } catch(Exception e){
+	        	e.printStackTrace();
+	        }
+	        
+		} else {
+			System.err.println("Not enough initial documents have been returned.");
+		}
+	
+		return expandedQuery;
         
 	}
 	
@@ -122,13 +128,14 @@ public class Rocchio {
 		}
 	}
 	
-	public Vector<TermQuery> combine(Vector<TermQuery> queryTerms, Vector<TermQuery> docsTerms){
+	//Combine the weights in the vectors. Based on Rocchio algorithm.
+	public Vector<TermQuery> combineWeights(Vector<TermQuery> queryTerms, Vector<TermQuery> docsTerms){
 		Vector<TermQuery> terms = new Vector<TermQuery>();
 		terms.addAll(docsTerms);
 		
 		for(int i = 0; i < queryTerms.size(); i++){
 			TermQuery term = queryTerms.elementAt(i);
-			TermQuery duplicateTerm = find(term, terms);
+			TermQuery duplicateTerm = findDuplicate(term, terms);
 			if(duplicateTerm != null){
 				float weight = term.getBoost() + duplicateTerm.getBoost();
 				duplicateTerm.setBoost(weight);
@@ -139,7 +146,7 @@ public class Rocchio {
 		return terms;
 	}
 	
-	public TermQuery find(TermQuery term, Vector<TermQuery> terms) {
+	public TermQuery findDuplicate(TermQuery term, Vector<TermQuery> terms) {
 		TermQuery termFound = null;
 
 		Iterator<TermQuery> iterator = terms.iterator();
@@ -178,8 +185,8 @@ public class Rocchio {
 		return terms;
 	}
 	
-	//Generic function for setting the weights of terms using TFIDF weighting
-	public Vector<TermQuery> setWeight(Vector<QueryTermVector> docsTerms, float factor){
+	//Set the weights of document terms for vectorizing using TFIDF weighting
+	public Vector<TermQuery> setWeightDocTerms(Vector<QueryTermVector> docsTerms, float factor){
 		Vector<TermQuery> terms = new Vector<TermQuery>();
 		
 		for(int i = 0; i < docsTerms.size(); i++){
@@ -207,6 +214,7 @@ public class Rocchio {
 		
 	}
 	
+	//Get the terms in the relevant documents
 	public Vector<QueryTermVector> getDocsTerms(Vector<Document> hits) throws IOException {
 		Vector<QueryTermVector> docsTerms = new Vector<QueryTermVector>();
 		try {

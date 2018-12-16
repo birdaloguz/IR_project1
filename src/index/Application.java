@@ -66,15 +66,13 @@ public class Application{
 	         
 	         System.out.println("Initial results: \n");
 	    	 search(query);
-	    	 Rocchio r = new Rocchio(1f, 0.0f, searcher);
+	    	 Rocchio r = new Rocchio(0.8f, 0.2f, searcher);
 	    	 System.out.println("Results after Rocchio: \n");
 	    	 search(r.expandQuery(query).toString("contents"));
 	         
 	         
-	      } catch (IOException e) {
-	         e.printStackTrace();
-	      } catch (NegativeArraySizeException ex){
-	    	  System.err.println("Cannot query empty string.");
+	      } catch (Exception e) {
+	         System.err.println("Error while processing query.");
 	      }
 	}
 	
