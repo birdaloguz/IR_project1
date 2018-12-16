@@ -1,9 +1,12 @@
 package index;
  
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
+
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.*;
@@ -17,39 +20,40 @@ import org.apache.lucene.benchmark.quality.trec.*;
    contrib/benchmark sources */
  
 public class PrecisionRecall {
- 
-  public static void main(String[] args) throws Throwable {
- 
-    File topicsFile = new File("./topics.txt");
-    File qrelsFile = new File("./qrels.txt");
-    Directory dir = FSDirectory.open(new File("./index"));
-    IndexReader reader = IndexReader.open(dir);
-    IndexSearcher searcher = new IndexSearcher(reader);
- 
-    String docNameField = "filename";
- 
-    PrintWriter logger = new PrintWriter(System.out, true);
- 
-    TrecTopicsReader qReader = new TrecTopicsReader();   //#1
-    QualityQuery qqs[] = qReader.readQueries(            //#1
-        new BufferedReader(new FileReader(topicsFile))); //#1
- 
-    Judge judge = new TrecJudge(new BufferedReader(      //#2
-        new FileReader(qrelsFile)));                     //#2
- 
-    judge.validateData(qqs, logger);                     //#3
- 
-    QualityQueryParser qqParser = new SimpleQQParser("title", "contents");  //#4
- 
-    QualityBenchmark qrun = new QualityBenchmark(qqs, qqParser, searcher, docNameField);
-    SubmissionReport submitLog = null;
-    QualityStats stats[] = qrun.execute(judge,           //#5
-            submitLog, logger);
- 
-    QualityStats avg = QualityStats.average(stats);      //#6
-    avg.log("SUMMARY",2,logger, "  ");
-    dir.close();
-  }
+	
+	private Searcher searcher;
+	private File topicsFile;
+	private File qrelsFile;
+	
+	public PrecisionRecall(Searcher searcher) {
+		// TODO Auto-generated constructor stub
+		this.searcher = searcher;
+		this.topicsFile = new File("./topics.txt");
+		this.qrelsFile = new File("./qrels.txt");
+	}
+	
+	public void calculatePrecisionRecall() throws Exception{
+		IndexSearcher searcher = this.searcher.getSearcher();
+		
+		String documentNameField = "filename";
+		
+		PrintWriter logger = new PrintWriter(System.out, true);
+		
+		TrecTopicsReader qReader = new TrecTopicsReader();
+		QualityQuery[] qqs = qReader.readQueries(new BufferedReader(new FileReader(topicsFile)));
+		Judge judge = new TrecJudge(new BufferedReader(new FileReader(qrelsFile)));
+		
+		judge.validateData(qqs,  logger);
+		
+		QualityQueryParser qqParser = new SimpleQQParser("title", "contents");
+		QualityBenchmark qrun = new QualityBenchmark(qqs, qqParser, searcher, documentNameField);
+		SubmissionReport submitLog = null;
+		QualityStats[] stats = qrun.execute(judge, submitLog, logger);
+		QualityStats avg = QualityStats.average(stats);
+		avg.log("SUMMARY", 2, logger, " ");
+		
+	}
+	
 }
  
 /*

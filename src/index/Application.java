@@ -64,13 +64,17 @@ public class Application{
 	        	 
 	         } 
 	         
+	         searcher = new Searcher(indexDir);
+	    	 PrecisionRecall quality = new PrecisionRecall(searcher);
+	    	 //Search without Rocchio
 	         System.out.println("Initial results: \n");
 	    	 search(query);
+	    	 
+	    	 //Search with query expansion
 	    	 Rocchio r = new Rocchio(0.8f, 0.2f, searcher);
 	    	 System.out.println("Results after Rocchio: \n");
 	    	 search(r.expandQuery(query).toString("contents"));
-	         
-	         
+	         quality.calculatePrecisionRecall();
 	      } catch (Exception e) {
 	         System.err.println("Error while processing query.");
 	      }
@@ -92,7 +96,7 @@ public class Application{
 	}
 	
 	 public void search(String searchQuery) throws IOException, ParseException {
-	      searcher = new Searcher(indexDir);
+//	      searcher = new Searcher(indexDir);
 	      long startTime = System.currentTimeMillis();
 	      TopDocs hits = searcher.search(searchQuery);
 	      long endTime = System.currentTimeMillis();

@@ -1,12 +1,12 @@
 # Format:
 #
-#       qnum   0                    doc-name                        is-relevant
+#       qnum  0                     doc-name                        				is-relevant
 #
 #
- 	
-0    0      			    .\data\1      		         1
-0    0      			    .\data\2      		         1
-0    0      			    .\data\3      		         1
-0    0      			    .\data\4      		         1
-0    0      			    .\data\5      		         1
-0    0      			    .\data\6      		         1
+0 0						.\data\dean-c\inbox\704							1
+0 0						.\data\dean-c\inbox\967								1
+0 0						.\data\dean-c\inbox\724							1
+0 0						.\data\arnold-j\deleted_items\717					1
+0 0						.\data\wolfe-j\07_saved\63								1
+0 0						.\data\arnold-j\deleted_items\720						1
+0 0						.\data\dean-c\all_documents\349							1
