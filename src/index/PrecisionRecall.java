@@ -19,24 +19,20 @@ import org.apache.lucene.benchmark.quality.trec.*;
  
 public class PrecisionRecall {
 	
-	private File topicsFile;
-	private File qrelsFile;
 	private TopDocs results;
 	private double precision;
 	private double recall;
 	
 	public PrecisionRecall() {
 		// TODO Auto-generated constructor stub
-		this.topicsFile = new File("./topics.txt");
-		this.qrelsFile = new File("./qrels.txt");
 	}
 	
 	public double[] calculatePrecisionRecall(){
 		double[] precisionRecall = new double[3];
 		
 		int numOfFound = results.totalHits;
-		int topKResults = results.scoreDocs.length;
-		int relevantResults = Rocchio.getNumOfRelevant(); //true positives
+		int topKResults = results.scoreDocs.length; // true positives without rocchio algorithm
+		int relevantResults = Rocchio.getNumOfRelevant(); //true positives for rocchio algorithm
 		
 		double falsePositives = numOfFound - relevantResults;
 		double falseNegatives = topKResults - relevantResults;
@@ -44,7 +40,7 @@ public class PrecisionRecall {
 		
 		double precision = relevantResults / (relevantResults + falsePositives);
 		double recall = relevantResults / (relevantResults + falseNegatives);
-		double recall2 = topKResults / (relevantResults + falseNegatives2);
+		double recall2 = topKResults / (topKResults + falseNegatives2);
 		
 		precisionRecall[0] = precision;
 		precisionRecall[1] = recall;
@@ -61,6 +57,5 @@ public class PrecisionRecall {
 	public void setResults(TopDocs results) {
 		this.results = results;
 	}
-	
 	
 }

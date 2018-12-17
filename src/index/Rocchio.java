@@ -24,7 +24,7 @@ public class Rocchio {
 	private float alpha;
 	private float beta;
 	private Searcher searcher;
-    private static final int NUM_OF_RELEVANT = 10;
+    private static final int NUM_OF_RELEVANT = 30;
 
 	
 	
