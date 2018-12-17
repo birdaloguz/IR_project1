@@ -24,9 +24,11 @@ public class Rocchio {
 	private float alpha;
 	private float beta;
 	private Searcher searcher;
-    private static final int NUM_OF_RELEVANT = 30;
+    private static final int NUM_OF_RELEVANT = 10;
 
 	
+	
+
 	public Rocchio(float alpha, float beta, Searcher searcher) {
 		// TODO Auto-generated constructor stub
 		this.alpha = alpha;
@@ -68,7 +70,7 @@ public class Rocchio {
 			
 	        
 	        try{
-	        	expandedQuery = mergeQueries(expandedQueryVector, 10);
+	        	expandedQuery = mergeQueries(expandedQueryVector, 5);
 	        	System.out.println("\u001B[32mExpanded Query: " + expandedQuery.toString("contents") + "\033[0m");
 	        } catch(Exception e){
 	        	e.printStackTrace();
@@ -292,6 +294,10 @@ public class Rocchio {
 
 	public void setSearcher(Searcher searcher) {
 		this.searcher = searcher;
+	}
+	
+	public static int getNumOfRelevant() {
+		return NUM_OF_RELEVANT;
 	}
 
 }

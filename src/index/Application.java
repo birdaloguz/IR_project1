@@ -65,16 +65,28 @@ public class Application{
 	         } 
 	         
 	         searcher = new Searcher(indexDir);
-	    	 PrecisionRecall quality = new PrecisionRecall(searcher);
+	    	 
 	    	 //Search without Rocchio
 	         System.out.println("Initial results: \n");
-	    	 search(query);
+	    	 TopDocs totalHits = search(query);
+	    	 PrecisionRecall beforeRocchio = new PrecisionRecall();
+	    	 beforeRocchio.setResults(totalHits);
+	    	 beforeRocchio.calculatePrecisionRecall();
 	    	 
+	    	 double[] precisionRecallBeforeRocchio = beforeRocchio.calculatePrecisionRecall();
+	         System.out.println("Precision: " + precisionRecallBeforeRocchio[0] + "\nRecall: " + precisionRecallBeforeRocchio[2]);
+	         
 	    	 //Search with query expansion
 	    	 Rocchio r = new Rocchio(0.8f, 0.2f, searcher);
 	    	 System.out.println("Results after Rocchio: \n");
-	    	 search(r.expandQuery(query).toString("contents"));
-	         quality.calculatePrecisionRecall();
+	    	 TopDocs hitsAfterRocchio = search(r.expandQuery(query).toString("contents"));
+	    	 
+	    	 PrecisionRecall quality = new PrecisionRecall();
+	    	 quality.setResults(hitsAfterRocchio);
+	    	 
+	    	 double[] precisionRecall = quality.calculatePrecisionRecall();
+	         System.out.println("Precision: " + precisionRecall[0] + "\nRecall: " + precisionRecall[1]);
+	         
 	      } catch (Exception e) {
 	         System.err.println("Error while processing query.");
 	      }
@@ -95,7 +107,7 @@ public class Application{
 		System.out.println(numIndexed + " File indexed, time taken: " + (endTime - startTime) + " ms");
 	}
 	
-	 public void search(String searchQuery) throws IOException, ParseException {
+	 public TopDocs search(String searchQuery) throws IOException, ParseException {
 //	      searcher = new Searcher(indexDir);
 	      long startTime = System.currentTimeMillis();
 	      TopDocs hits = searcher.search(searchQuery);
@@ -109,6 +121,7 @@ public class Application{
 	            + doc.get(Config.FILE_PATH) + " Query: " + searchQuery);
 	      }
 	      searcher.close();
+	      return hits;
 	   }
 	/*
 	 * CURRENTLY NOT USED
