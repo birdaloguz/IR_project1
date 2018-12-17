@@ -1,12 +1,15 @@
 # Format:
 #
-#       qnum  0                     doc-name                        				is-relevant
+#qnum  0                     		doc-name                        				is-relevant
 #
 #
-0 0						.\data\dean-c\inbox\704							1
-0 0						.\data\dean-c\inbox\967								1
-0 0						.\data\dean-c\inbox\724							1
-0 0						.\data\arnold-j\deleted_items\717					1
-0 0						.\data\wolfe-j\07_saved\63								1
-0 0						.\data\arnold-j\deleted_items\720						1
-0 0						.\data\dean-c\all_documents\349							1
+1	0						.\data\dasovich-j\all_documents\12436 						1
+1	0						.\data\dasovich-j\notes_inbox\3389 							1
+1	0						.\data\dasovich-j\all_documents\28107 						1
+1	0						.\data\dasovich-j\notes_inbox\12336 						1
+1	0						.\data\dasovich-j\all_documents\11162 						1
+1	0						.\data\dasovich-j\notes_inbox\4234 							1
+1	0						.\data\dasovich-j\all_documents\12072 						1
+1	0						.\data\dasovich-j\notes_inbox\3629 							1
+1	0						.\data\dasovich-j\all_documents\27902 						1
+1	0						.\data\dasovich-j\notes_inbox\12481 						1
