@@ -74,7 +74,7 @@ public class Application{
 	    	 beforeRocchio.calculatePrecisionRecall();
 	    	 
 	    	 double[] precisionRecallBeforeRocchio = beforeRocchio.calculatePrecisionRecall();
-	         System.out.println("Precision: " + precisionRecallBeforeRocchio[0] + "\nRecall: " + precisionRecallBeforeRocchio[2]);
+	         System.out.println("Precision: " + precisionRecallBeforeRocchio[2] + "\nRecall: " + precisionRecallBeforeRocchio[1]);
 	         
 	    	 //Search with query expansion
 	    	 Rocchio r = new Rocchio(0.5f, 0.5f, searcher);

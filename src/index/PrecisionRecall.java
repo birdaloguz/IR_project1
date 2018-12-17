@@ -35,16 +35,16 @@ public class PrecisionRecall {
 		int relevantResults = Rocchio.getNumOfRelevant(); //true positives for rocchio algorithm
 		
 		double falsePositives = numOfFound - relevantResults;
-		double falseNegatives =  Math.round((100000 - numOfFound)*20/100);
-		double falseNegatives2 = numOfFound - topKResults;
+		double falsePositives2 = numOfFound - topKResults;
+		double falseNegatives =  Math.round((103256 - numOfFound)*5/100);
 		
 		double precision = relevantResults / (relevantResults + falsePositives);
+		double precision2 = topKResults / (topKResults + falsePositives2);
 		double recall = relevantResults / (relevantResults + falseNegatives);
-		double recall2 = topKResults / (topKResults + falseNegatives2);
 		
 		precisionRecall[0] = precision;
 		precisionRecall[1] = recall;
-		precisionRecall[2] = recall2;
+		precisionRecall[2] = precision2;
 		
 		return precisionRecall;
 		
