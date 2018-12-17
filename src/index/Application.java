@@ -77,7 +77,7 @@ public class Application{
 	         System.out.println("Precision: " + precisionRecallBeforeRocchio[0] + "\nRecall: " + precisionRecallBeforeRocchio[2]);
 	         
 	    	 //Search with query expansion
-	    	 Rocchio r = new Rocchio(0.8f, 0.2f, searcher);
+	    	 Rocchio r = new Rocchio(0.5f, 0.5f, searcher);
 	    	 System.out.println("Results after Rocchio: \n");
 	    	 TopDocs hitsAfterRocchio = search(r.expandQuery(query).toString("contents"));
 	    	 

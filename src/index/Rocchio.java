@@ -50,23 +50,23 @@ public class Rocchio {
 			
 			Vector<TermQuery> expandedQueryVector = combineWeights(queryTerms, docsTerms);
 				
-//	        Collections.sort(expandedQueryVector, new Comparator<Object>() {
-//
-//				@Override
-//				public int compare(Object o1, Object o2) {
-//					// TODO Auto-generated method stub
-//					Query q1 = (Query) o1;
-//					Query q2 = (Query) o2;
-//					
-//					if(q1.getBoost() > q2.getBoost()){
-//						return -1;
-//					} else if(q2.getBoost() > q1.getBoost()){
-//						return 1;
-//					} else {
-//		 				return 0;
-//					}
-//				}
-//			} ); 
+	        Collections.sort(expandedQueryVector, new Comparator<Object>() {
+
+				@Override
+				public int compare(Object o1, Object o2) {
+					// TODO Auto-generated method stub
+					Query q1 = (Query) o1;
+					Query q2 = (Query) o2;
+					
+					if(q1.getBoost() > q2.getBoost()){
+						return -1;
+					} else if(q2.getBoost() > q1.getBoost()){
+						return 1;
+					} else {
+		 				return 0;
+					}
+				}
+			} ); 
 			
 	        
 	        try{
